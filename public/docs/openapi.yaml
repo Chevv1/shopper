@@ -1,0 +1,805 @@
+openapi: 3.1.0
+info:
+  title: Your Symfony DDD API
+  description: API для проекта на Symfony с Domain-Driven Design
+  version: 1.0.0
+
+servers:
+  - url: https://your-domain.com/api/v1
+    description: Production
+  - url: http://localhost:8000/api/v1
+    description: Development
+
+paths:
+  /auth/login:
+    post:
+      summary: Аутентификация пользователя
+      operationId: login
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Успешный логин, возвращаются access и refresh токены
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+                  expires_in:
+                    type: integer
+        '401':
+          description: Неверные данные
+
+  /auth/refresh:
+    post:
+      summary: Обновление access-токена по refresh-токену
+      operationId: refreshToken
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+      responses:
+        '200':
+          description: Новый access-токен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+                  expires_in:
+                    type: integer
+
+  /profile:
+    get:
+      summary: Получить профиль текущего пользователя
+      operationId: showMyProfile
+      tags:
+        - Profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Профиль пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+
+    post:
+      summary: Создать профиль для текущего пользователя (если ещё не создан)
+      operationId: createProfileForCurrentUser
+      tags:
+        - Profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                avatar_id:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: Профиль создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /products:
+    get:
+      summary: Список продуктов (каталог)
+      operationId: listProducts
+      tags:
+        - Catalog
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: Список продуктов
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  limit:
+                    type: integer
+
+    post:
+      summary: Создать новый продукт (для вендора)
+      operationId: createProduct
+      tags:
+        - Vendor Management
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                price:
+                  type: object
+                  properties:
+                    amount:
+                      type: integer
+                    currency_id:
+                      type: string
+                      format: uuid
+                category_id:
+                  type: string
+                  format: uuid
+                image_ids:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+
+      responses:
+        '201':
+          description: Продукт создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /products/{id}:
+    get:
+      summary: Получить продукт по ID
+      operationId: showProduct
+      tags:
+        - Catalog
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Продукт найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Продукт не найден
+
+  /products/{productId}/units:
+    post:
+      summary: Создать единицу продукта (вариант, SKU и т.д.)
+      operationId: createProductUnit
+      tags:
+        - Vendor Management
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                asset_ids:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+      responses:
+        '201':
+          description: Единица продукта создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /categories:
+    get:
+      summary: Получить список категорий товаров
+      description: Возвращает дерево или плоский список всех категорий товаров в каталоге
+      operationId: getCategories
+      tags:
+        - Catalog
+        - Categories
+      parameters:
+        - name: parentId
+          in: query
+          schema:
+            type: string
+            format: uuid
+            nullable: true
+          description: Получить только дочерние категории для указанного родителя (null = корневые категории)
+      responses:
+        '200':
+          description: Успешный ответ — список категорий
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+        '500':
+          description: Внутренняя ошибка сервера
+
+  /orders:
+    get:
+      summary: Список заказов текущего пользователя
+      operationId: showMyOrders
+      tags:
+        - Orders
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Список заказов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+
+    post:
+      summary: Оформить заказ
+      operationId: placeOrder
+      tags:
+        - Orders
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      product_id:
+                        type: string
+                        format: uuid
+                      quantity:
+                        type: integer
+      responses:
+        '201':
+          description: Заказ создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /files/images/upload:
+    post:
+      summary: Загрузить изображение
+      operationId: uploadImage
+      tags:
+        - Files
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Изображение загружено
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      file_id:
+                        type: string
+                        format: uuid
+
+  /currencies:
+    get:
+      summary: Получить список доступных валют
+      description: Возвращает список всех поддерживаемых валют с основными данными (код, название, символ и т.д.)
+      operationId: getCurrencies
+      tags:
+        - Currencies
+      responses:
+        '200':
+          description: Успешный ответ — список валют
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Currency'
+        '500':
+          description: Внутренняя ошибка сервера
+
+  /payment_methods:
+    get:
+      summary: Получить список доступных способов оплаты
+      description: |
+        Возвращает список всех активных способов оплаты, доступных в системе 
+        на текущий момент (карты, электронные кошельки, банковские переводы и т.д.)
+      operationId: getPaymentMethods
+      tags:
+        - Payment
+      parameters:
+        - name: currency_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+          description: Фильтр по валюте. Некоторые методы могут быть доступны только для определённых валют
+      responses:
+        '200':
+          description: Список доступных способов оплаты
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaymentMethod'
+        '400':
+          description: Некорректные параметры запроса (неверный код валюты)
+        '500':
+          description: Внутренняя ошибка сервера
+
+  /cart:
+    get:
+      summary: Получить текущую корзину пользователя
+      operationId: getCart
+      tags:
+        - Cart
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '200':
+          description: Текущая корзина пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+        '401':
+          description: Не авторизован
+        '404':
+          description: Корзина не найдена (пустая, но обычно возвращаем пустую)
+
+    delete:
+      summary: Очистить корзину полностью
+      operationId: clearCart
+      tags:
+        - Cart
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '204':
+          description: Корзина успешно очищена
+        '401':
+          description: Не авторизован
+
+  /cart/items:
+    post:
+      summary: Добавить товар в корзину
+      operationId: addToCart
+      tags:
+        - Cart
+      security:
+        - bearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - productId
+                - quantity
+              properties:
+                productId:
+                  type: string
+                  format: uuid
+                quantity:
+                  type: integer
+                  minimum: 1
+      responses:
+        '201':
+          description: Товар добавлен (новая позиция)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+        '200':
+          description: Товар добавлен (количество увеличено в существующей позиции)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+        '400':
+          description: Некорректные данные (нет такого продукта, недостаточно на складе и т.д.)
+
+  /cart/items/{itemId}:
+    patch:
+      summary: Изменить количество товара в корзине
+      operationId: updateCartItem
+      tags:
+        - Cart
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - quantity
+              properties:
+                quantity:
+                  type: integer
+                  minimum: 0
+      responses:
+        '200':
+          description: Количество обновлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+        '404':
+          description: Позиция не найдена в корзине
+
+    delete:
+      summary: Удалить позицию из корзины
+      operationId: removeCartItem
+      tags:
+        - Cart
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Позиция удалена
+        '404':
+          description: Позиция не найдена
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+
+    ProductListResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/Product'
+      description: Массив продуктов (для списка)
+      example:
+        - id: "a2c10716-d58f-4c86-a26a-2dbfd88eccef"
+          title: "test"
+          description: "test description"
+          price:
+            amount: 2000
+            currency_id: "5ca65f39-c231-4b7d-92e0-bb746fb4f1fd"
+          seller:
+            id: "a9345278-7674-45bf-86b4-74061bfcbcac"
+            name: "super profile"
+            avatar:
+              filename: "img_69526c813a9fa5.19616954.jpg"
+              url: "/uploads/images/2025/12/img_69526c813a9fa5.19616954.jpg"
+          images:
+            - filename: "img_694e4106ec4e08.76376369.jpg"
+              url: "/uploads/images/2025/12/img_694e4106ec4e08.76376369.jpg"
+
+    Product:
+      type: object
+      required:
+        - id
+        - title
+        - price
+        - seller
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор продукта
+        title:
+          type: string
+          description: Название продукта
+          example: "test"
+        description:
+          type: string
+          nullable: true
+          description: Описание продукта
+          example: "test description"
+        price:
+          $ref: '#/components/schemas/Price'
+        seller:
+          $ref: '#/components/schemas/ProductSeller'
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/Image'
+          description: Изображения продукта
+
+    Price:
+      type: object
+      required:
+        - amount
+        - currency_id
+      properties:
+        amount:
+          type: integer
+          description: Цена в минимальных единицах валюты (копейки, центы и т.д.)
+          example: 2000
+        currency_id:
+          type: string
+          format: uuid
+          description: ID валюты
+          example: "5ca65f39-c231-4b7d-92e0-bb746fb4f1fd"
+
+    ProductSeller:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID продавца
+        name:
+          type: string
+          description: Имя/название профиля продавца
+          example: "super profile"
+        avatar:
+          $ref: '#/components/schemas/Image'
+          nullable: true
+          description: Аватар продавца
+
+    Category:
+      type: object
+      description: Категория товаров
+      required:
+        - id
+        - name
+        - slug
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор категории
+        name:
+          type: string
+          description: Название категории
+          example: "Игровые аккаунты"
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+          description: Дочерние категории
+          nullable: true
+        productCount:
+          type: integer
+          description: Количество активных товаров в этой категории (и подкатегориях)
+          nullable: true
+
+    Image:
+      type: object
+      required:
+        - filename
+        - url
+      properties:
+        filename:
+          type: string
+          description: Имя файла на сервере
+          example: "img_694e4106ec4e08.76376369.jpg"
+        url:
+          type: string
+          description: Относительный или абсолютный URL изображения
+          example: "/uploads/images/2025/12/img_694e4106ec4e08.76376369.jpg"
+
+    Profile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        avatar:
+          $ref: '#/components/schemas/Image'
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+        total:
+          type: number
+          format: float
+
+    Currency:
+      type: object
+      description: Информация об одной валюте
+      required:
+        - code
+        - name
+      properties:
+        id:
+          type: string
+          description: ID валюты
+          format: uuid
+        code:
+          type: string
+          description: Трёхбуквенный ISO 4217 код валюты
+          example: "USD"
+          minLength: 3
+          maxLength: 3
+        name:
+          type: string
+          description: Полное название валюты
+          example: "United States Dollar"
+        symbol:
+          type: string
+          description: Символ валюты (может быть null для некоторых редких валют)
+          example: "$"
+          nullable: true
+
+    PaymentMethod:
+      type: object
+      description: Способ оплаты
+      required:
+        - id
+        - name
+        - type
+        - isActive
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор способа оплаты
+        name:
+          type: string
+          description: Человеко-читаемое название (отображается пользователю)
+          example: "Visa / Mastercard"
+        type:
+          type: string
+          enum:
+            - bank_card
+            - crypto
+          description: Тип/категория способа оплаты
+        logo:
+          $ref: '#/components/schemas/Image'
+
+    Cart:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+        totalItems:
+          type: integer
+          example: 5
+        totalAmount:
+          $ref: '#/components/schemas/Price'
+
+    CartItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        product:
+          $ref: '#/components/schemas/Product'
+        quantity:
+          type: integer
+          example: 3
+        subtotal:
+          $ref: '#/components/schemas/Price'
+
+security:
+  - bearerAuth: []  # применяется ко всем эндпоинтам, требующим авторизации

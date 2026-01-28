@@ -1,0 +1,11 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Order\Domain\ValueObject\Checkout;
+
+use App\Shared\Domain\ValueObject\DateTimeValue;
+
+final readonly class CheckoutCreatedAt extends DateTimeValue
+{
+}
