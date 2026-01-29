@@ -40,21 +40,23 @@ final readonly class DoctrineCategoryRepository implements CategoryRepositoryInt
 
     private static function buildTree(array $rows): array
     {
-        $items = [];
         $tree = [];
+        $references = [];
 
-        // Сначала делаем удобный доступ по id
-        foreach ($rows as $row) {
-            $items[$row['id']] = $row;
-            $items[$row['id']]['children'] = []; // сразу добавляем пустой массив
+        foreach ($rows as $element) {
+            $element['children'] = [];
+            $references[$element['id']] = $element;
         }
 
-        // Распределяем по родителям
-        foreach ($items as $id => $item) {
-            if ($item['parent_id'] === null) {
-                $tree[] = &$items[$id];
-            } else if (isset($items[$item['parent_id']])) {
-                $items[$item['parent_id']]['children'][] = &$items[$id];
+        foreach ($references as &$node) {
+            $nodeParentId = $node['parent_id'];
+
+            if ($nodeParentId === null) {
+                $tree[] = &$node;
+            } else {
+                if (array_key_exists(key: $nodeParentId, array: $references)) {
+                    $references[$nodeParentId]['children'][] = &$node;
+                }
             }
         }
 
@@ -70,7 +72,6 @@ final readonly class DoctrineCategoryRepository implements CategoryRepositoryInt
                 callback: static fn(array $row): CategoryReadModel => self::hydrate($row),
                 array: $row['children'],
             ),
-            productCount: 0,
         );
     }
 }

@@ -8,22 +8,17 @@ use App\Order\Application\Port\Cart\CartItemSnapshot;
 use App\Order\Application\Port\Cart\CartServiceInterface;
 use App\Order\Application\Port\Catalog\CatalogServiceInterface;
 use App\Order\Application\Port\Catalog\ProductSnapshot;
-use App\Order\Domain\Entity\Checkout;
-use App\Order\Domain\Entity\Order;
 use App\Order\Domain\Exception\CannotPlaceOrderException;
 use App\Order\Domain\Factory\CheckoutFactory;
 use App\Order\Domain\Factory\OrderFactory;
 use App\Order\Domain\Factory\OrderItemFactory;
 use App\Order\Domain\Repository\OrderRepositoryInterface;
 use App\Order\Domain\Repository\CheckoutRepositoryInterface;
-use App\Order\Domain\ValueObject\Checkout\CheckoutOrderIds;
-use App\Order\Domain\ValueObject\Checkout\CheckoutTotalAmount;
 use App\Order\Domain\ValueObject\Order\OrderCustomerId;
 use App\Order\Domain\ValueObject\Order\OrderItem;
 use App\Order\Domain\ValueObject\Order\OrderItemProductId;
 use App\Order\Domain\ValueObject\Order\OrderItems;
 use App\Order\Domain\ValueObject\Order\OrderTotalPrice;
-use App\Shared\Application\Bus\EventBusInterface;
 use App\Shared\Application\Command\CommandHandlerInterface;
 use App\Shared\Application\Command\CommandResult;
 
@@ -34,7 +29,6 @@ final readonly class PlaceOrderCommandHandler implements CommandHandlerInterface
         private CheckoutRepositoryInterface $checkoutRepository,
         private CartServiceInterface        $cartService,
         private CatalogServiceInterface     $catalogService,
-        private EventBusInterface           $eventBus,
     ) {}
 
     public function __invoke(PlaceOrderCommand $command): CommandResult
