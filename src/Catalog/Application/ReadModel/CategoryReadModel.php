@@ -15,7 +15,6 @@ final readonly class CategoryReadModel implements ReadModelInterface
         public string $id,
         public string $name,
         public array $children,
-        public int $productCount,
     ) {}
 
     public function toArray(): array
@@ -27,7 +26,6 @@ final readonly class CategoryReadModel implements ReadModelInterface
                 callback: static fn(CategoryReadModel $item): array => $item->toArray(),
                 array: $this->children,
             ),
-            'product_count' => $this->productCount,
         ];
     }
 }

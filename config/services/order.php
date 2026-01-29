@@ -63,6 +63,11 @@ return static function (ContainerConfigurator $configurator): void {
         referencedId: \App\Order\Infrastructure\Repository\Write\DoctrineOrderRepository::class
     );
 
+    $services->alias(
+        id: \App\Order\Domain\Repository\CheckoutRepositoryInterface::class,
+        referencedId: \App\Order\Infrastructure\Repository\Write\DoctrineCheckoutRepository::class
+    );
+
     // ACL
     $services->alias(
         id: \App\Order\Application\Port\Catalog\CatalogServiceInterface::class,

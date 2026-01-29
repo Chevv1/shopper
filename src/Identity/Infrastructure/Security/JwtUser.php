@@ -20,7 +20,6 @@ final readonly class JwtUser implements UserInterface
 
     public function eraseCredentials(): void
     {
-        // Ничего не делаем
     }
 
     public function getUserIdentifier(): string
