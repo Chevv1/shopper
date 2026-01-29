@@ -81,7 +81,7 @@ final readonly class DoctrineChatRepository implements ChatRepositoryInterface
         );
 
         $messages = array_map(
-            callback: static fn(array $message) => self::reflectionHydrate(
+            callback: static fn(array $message) => self::hydrate(
                 className: ChatMessage::class,
                 data: [
                     'id' => new ChatMessageId($message['id']),
@@ -94,7 +94,7 @@ final readonly class DoctrineChatRepository implements ChatRepositoryInterface
         );
 
         $members = array_map(
-            callback: static fn(array $member) => self::reflectionHydrate(
+            callback: static fn(array $member) => self::hydrate(
                 className: ChatMember::class,
                 data: [
                     'id' => new ChatMemberId($member['id']),
@@ -106,7 +106,7 @@ final readonly class DoctrineChatRepository implements ChatRepositoryInterface
             array: $membersData,
         );
 
-        return self::reflectionHydrate(
+        return self::hydrate(
             className: Chat::class,
             data: [
                 'id' => new ChatId($chatData['id']),

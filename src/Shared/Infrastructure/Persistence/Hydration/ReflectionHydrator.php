@@ -16,7 +16,7 @@ trait ReflectionHydrator
      * @return T
      * @throws ReflectionException
      */
-    protected static function reflectionHydrate(string $className, array $data): object
+    protected static function hydrate(string $className, array $data): object
     {
         $reflection = new ReflectionClass(objectOrClass: $className);
         $instance = $reflection->newInstanceWithoutConstructor();
