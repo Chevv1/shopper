@@ -84,7 +84,7 @@ final readonly class DoctrineProductRepository implements ProductRepositoryInter
             }
         }
 
-        return self::reflectionHydrate(
+        return self::hydrate(
             className: Product::class,
             data: [
                 'id' => new ProductId($firstRow['id']),
@@ -191,11 +191,13 @@ final readonly class DoctrineProductRepository implements ProductRepositoryInter
 
     private function syncUnits(ProductId $productId, ProductUnits $units): void
     {
-        if ($units->count() > 0) {
-            $this->productUnitRepository->deleteMissing(productId: $productId, units: $units);
-        } else {
+        if ($units->isEmpty() === true) {
             $this->productUnitRepository->delete(productId: $productId);
+
+            return;
         }
+
+        $this->productUnitRepository->deleteMissing(productId: $productId, units: $units);
 
         /** @var ProductUnit $unit */
         foreach ($units as $unit) {

@@ -47,7 +47,7 @@ final readonly class DoctrineUserRepository implements UserRepositoryInterface
             throw new UserNotFound($email);
         }
 
-        return self::reflectionHydrate(
+        return self::hydrate(
             className: User::class,
             data: [
                 'id' => new UserId($userData['id']),

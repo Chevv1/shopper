@@ -13,4 +13,17 @@ final readonly class CheckoutOrderIds extends CollectionValue
     {
         return OrderId::class;
     }
+
+    public function has(OrderId $orderId): bool
+    {
+        return array_any(
+            array: $this->items,
+            callback: static fn(OrderId $item): bool => $item->equals($orderId) === true,
+        );
+    }
+
+    public function remove(OrderId $orderId): CheckoutOrderIds
+    {
+        return $this->filter(static fn(OrderId $item): bool => $item->equals($orderId) === true);
+    }
 }

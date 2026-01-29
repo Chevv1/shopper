@@ -59,7 +59,7 @@ final readonly class DoctrineOrderRepository implements OrderRepositoryInterface
             params: [$orderData['id']],
         );
 
-        return self::reflectionHydrate(
+        return self::hydrate(
             className: Order::class,
             data: [
                 'id' => new OrderId($orderData['id']),
@@ -67,7 +67,7 @@ final readonly class DoctrineOrderRepository implements OrderRepositoryInterface
                 'status' => new OrderStatus($orderData['status']),
                 'items' => new OrderItems(
                     items: array_map(
-                        callback: static fn(array $orderItem) => self::reflectionHydrate(
+                        callback: static fn(array $orderItem) => self::hydrate(
                             className: OrderItem::class,
                             data: [
                                 'productId' => new OrderItemProductId($orderItem['product_id']),
