@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\VendorManagement\Presentation\Controller;
 
 use App\Shared\Application\Bus\CommandBusInterface;
+use App\Shared\Application\Bus\QueryBusInterface;
 use App\VendorManagement\Application\Command\CreateProduct\CreateProductCommand;
 use App\VendorManagement\Application\Command\CreateProductUnit\CreateProductUnitCommand;
+use App\VendorManagement\Application\Query\GetSellerProducts\GetSellerProductsQuery;
 use App\VendorManagement\Presentation\Request\CreateProductRequest;
 use App\VendorManagement\Presentation\Request\CreateProductUnitRequest;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -14,11 +16,13 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 final class ProductController extends AbstractController
 {
     public function __construct(
         private readonly CommandBusInterface $commandBus,
+        private readonly QueryBusInterface   $queryBus,
     ) {}
 
     public function createProduct(
@@ -72,5 +76,19 @@ final class ProductController extends AbstractController
             ],
             status: Response::HTTP_CREATED,
         );
+    }
+
+    public function getMyProducts(): JsonResponse
+    {
+        $user = $this->getUser();
+        if ($user === null) {
+            throw new AccessDeniedHttpException('User must be authenticated');
+        }
+
+        $query = new GetSellerProductsQuery(sellerId: $user->getUserIdentifier());
+
+        $readModel = $this->queryBus->ask($query);
+
+        return $this->json($readModel->toArray());
     }
 }

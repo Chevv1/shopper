@@ -19,7 +19,7 @@ final class Version20251224095058 extends AbstractMigration
     {
         $table = $schema->createTable('users');
 
-        $table->addColumn('id', 'guid', ['notnull' => true]);
+        $table->addColumn('id', 'uuid', ['notnull' => true]);
         $table->addColumn('email', 'string', ['length' => 255, 'notnull' => true]);
         $table->addColumn('password', 'string', ['length' => 255, 'notnull' => true]);
         $table->addColumn('roles', 'json', ['notnull' => true, 'default' => '["ROLE_USER"]']);

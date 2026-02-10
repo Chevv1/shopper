@@ -29,7 +29,6 @@ final readonly class DoctrineCartRepository implements CartRepositoryInterface
 
         if (empty($cartData)) {
             return new CartReadModel(
-                id: null,
                 items: [],
                 totalAmount: 0,
                 totalItems: 0,
@@ -75,7 +74,6 @@ final readonly class DoctrineCartRepository implements CartRepositoryInterface
         }
 
         return new CartReadModel(
-            id: $cartData['id'],
             items: $cartItems,
             totalAmount: $totalAmount,
             totalItems: $totalItems,

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Order\Domain\Exception;
 
-use App\Order\Domain\ValueObject\Order\OrderCustomerId;
-use App\Order\Domain\ValueObject\Order\OrderItemProductId;
+use App\Order\Domain\Entity\OrderCustomerId;
+use App\Order\Domain\Entity\OrderItemProductId;
 use App\Shared\Domain\Exception\DomainException;
 
 final class CannotPlaceOrderException extends DomainException

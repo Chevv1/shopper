@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Order\Infrastructure\ACL;
 
-use App\Order\Application\Port\Cart\CartItemSnapshot;
-use App\Order\Application\Port\Cart\CartServiceInterface;
-use App\Order\Application\Port\Cart\CartSnapshot;
-use App\Order\Domain\ValueObject\Order\OrderCustomerId;
-use App\Order\Domain\ValueObject\Order\OrderId;
-use App\Order\Domain\ValueObject\Order\OrderItemProductId;
-use App\Order\Domain\ValueObject\Order\OrderItemQuantity;
+use App\Order\Application\Service\Cart\CartItemSnapshot;
+use App\Order\Application\Service\Cart\CartServiceInterface;
+use App\Order\Application\Service\Cart\CartSnapshot;
+use App\Order\Domain\Entity\OrderCustomerId;
+use App\Order\Domain\Entity\OrderId;
+use App\Order\Domain\Entity\OrderItemProductId;
+use App\Order\Domain\Entity\OrderItemQuantity;
 use Doctrine\DBAL\Connection;
 
 final readonly class CartService implements CartServiceInterface

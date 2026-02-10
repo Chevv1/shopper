@@ -34,6 +34,7 @@ final class ProfileController extends AbstractController
             /** @var ProfileReadModel $profile */
             $profile = $this->queryBus->ask(query: $query);
         } catch (HandlerFailedException $e) {
+            dd($e);
             $busException = $e->getPrevious();
 
             if ($busException instanceof ProfileNotFound) {
@@ -45,6 +46,14 @@ final class ProfileController extends AbstractController
                     status: Response::HTTP_NOT_FOUND,
                 );
             }
+
+            return $this->json(
+                data: [
+                    'success' => false,
+                    'error' => $e->getMessage(),
+                ],
+                status: Response::HTTP_INTERNAL_SERVER_ERROR,
+            );
         }
 
         return $this->json(

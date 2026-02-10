@@ -18,8 +18,8 @@ final class Version20251229111838 extends AbstractMigration
     {
         $table = $schema->createTable(name: 'product_images');
 
-        $table->addColumn(name: 'product_id', typeName: 'guid', options: ['length' => 36, 'notnull' => true]);
-        $table->addColumn(name: 'image_id', typeName: 'guid', options: ['length' => 36, 'notnull' => true]);
+        $table->addColumn(name: 'product_id', typeName: 'uuid', options: ['length' => 36, 'notnull' => true]);
+        $table->addColumn(name: 'image_id', typeName: 'uuid', options: ['length' => 36, 'notnull' => true]);
 
         $table->addIndex(['product_id'], 'idx_product_image_product');
 

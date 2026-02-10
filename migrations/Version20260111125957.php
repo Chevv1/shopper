@@ -19,8 +19,8 @@ final class Version20260111125957 extends AbstractMigration
     {
         $table = $schema->createTable(name: 'cart_items');
 
-        $table->addColumn(name: 'cart_id', typeName: 'guid', options: ['length' => 36, 'notnull' => true]);
-        $table->addColumn(name: 'product_id', typeName: 'guid', options: ['length' => 36, 'notnull' => true]);
+        $table->addColumn(name: 'cart_id', typeName: 'uuid', options: ['length' => 36, 'notnull' => true]);
+        $table->addColumn(name: 'product_id', typeName: 'uuid', options: ['length' => 36, 'notnull' => true]);
         $table->addColumn(name: 'quantity', typeName: 'integer', options: ['default' => 1, 'notnull' => true]);
         $table->addColumn(name: 'price', typeName: 'integer', options: ['notnull' => true]);
 

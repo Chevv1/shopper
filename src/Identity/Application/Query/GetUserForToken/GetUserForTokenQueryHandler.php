@@ -8,6 +8,7 @@ use App\Identity\Application\ReadModel\UserReadModel;
 use App\Identity\Application\Repository\UserRepositoryInterface;
 use App\Identity\Domain\Entity\User\UserEmail;
 use App\Shared\Application\Query\QueryHandlerInterface;
+use App\Shared\Application\Query\QueryInterface;
 
 final readonly class GetUserForTokenQueryHandler implements QueryHandlerInterface
 {

@@ -12,14 +12,16 @@ use Symfony\Component\Messenger\MessageBusInterface;
 final readonly class SymfonyEventBus implements EventBusInterface
 {
     public function __construct(
-        private MessageBusInterface $bus
+        private MessageBusInterface $bus,
     ) {}
 
     /**
      * @throws ExceptionInterface
      */
-    public function dispatch(DomainEvent $event): void
+    public function publish(DomainEvent ...$events): void
     {
-        $this->bus->dispatch($event);
+        foreach ($events as $event) {
+            $this->bus->dispatch($event);
+        }
     }
 }

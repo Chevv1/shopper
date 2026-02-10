@@ -6,4 +6,5 @@ namespace App\Shared\Application;
 
 interface LoggerInterface
 {
+    public function error(string $message, array $context): void;
 }

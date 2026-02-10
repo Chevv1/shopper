@@ -22,9 +22,9 @@ final class Version20260109122022 extends AbstractMigration
     {
         $table = $schema->createTable(name: 'categories');
 
-        $table->addColumn(name: 'id', typeName: 'guid', options: ['notnull' => true]);
+        $table->addColumn(name: 'id', typeName: 'uuid', options: ['notnull' => true]);
         $table->addColumn(name: 'name', typeName: 'string', options: ['notnull' => true]);
-        $table->addColumn(name: 'parent_id', typeName: 'guid', options: ['length' => 36, 'notnull' => false]);
+        $table->addColumn(name: 'parent_id', typeName: 'uuid', options: ['length' => 36, 'notnull' => false]);
         $table->addColumn(name: 'created_at', typeName: 'datetime_immutable', options: ['notnull' => true]);
         $table->addColumn(name: 'updated_at', typeName: 'datetime_immutable', options: ['notnull' => true]);
 

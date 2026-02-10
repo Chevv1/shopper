@@ -12,7 +12,6 @@ final readonly class CartReadModel implements ReadModelInterface
      * @param CartItemReadModel[] $items
      */
     public function __construct(
-        public ?string $id,
         public array $items,
         public int $totalAmount,
         public int $totalItems,
@@ -21,7 +20,6 @@ final readonly class CartReadModel implements ReadModelInterface
     public function toArray(): array
     {
         return [
-            'id' => $this->id,
             'items' => array_map(
                 callback: static fn(CartItemReadModel $item): array => $item->toArray(),
                 array: $this->items,

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Order\Domain\Service;
 
-use App\Order\Domain\ValueObject\Order\OrderItemPrice;
-use App\Order\Domain\ValueObject\Order\OrderItemProductId;
+use App\Order\Domain\Entity\OrderItemPrice;
+use App\Order\Domain\Entity\OrderItemProductId;
 
 final readonly class ProductPricingService
 {

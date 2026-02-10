@@ -5,19 +5,20 @@ declare(strict_types=1);
 namespace App\Order\Infrastructure\Repository\Write;
 
 use App\Order\Domain\Entity\Order;
+use App\Order\Domain\Entity\OrderCreatedAt;
+use App\Order\Domain\Entity\OrderCustomerId;
+use App\Order\Domain\Entity\OrderId;
+use App\Order\Domain\Entity\OrderItem;
+use App\Order\Domain\Entity\OrderItemId;
+use App\Order\Domain\Entity\OrderItemPrice;
+use App\Order\Domain\Entity\OrderItemProductId;
+use App\Order\Domain\Entity\OrderItemQuantity;
+use App\Order\Domain\Entity\OrderItems;
+use App\Order\Domain\Entity\OrderStatus;
+use App\Order\Domain\Entity\OrderTotalPrice;
+use App\Order\Domain\Entity\OrderUpdatedAt;
 use App\Order\Domain\Exception\OrderNotFoundException;
 use App\Order\Domain\Repository\OrderRepositoryInterface;
-use App\Order\Domain\ValueObject\Order\OrderCreatedAt;
-use App\Order\Domain\ValueObject\Order\OrderCustomerId;
-use App\Order\Domain\ValueObject\Order\OrderId;
-use App\Order\Domain\ValueObject\Order\OrderItem;
-use App\Order\Domain\ValueObject\Order\OrderItemPrice;
-use App\Order\Domain\ValueObject\Order\OrderItemProductId;
-use App\Order\Domain\ValueObject\Order\OrderItemQuantity;
-use App\Order\Domain\ValueObject\Order\OrderItems;
-use App\Order\Domain\ValueObject\Order\OrderStatus;
-use App\Order\Domain\ValueObject\Order\OrderTotalPrice;
-use App\Order\Domain\ValueObject\Order\OrderUpdatedAt;
 use App\Shared\Infrastructure\Persistence\Hydration\ReflectionHydrator;
 use Doctrine\DBAL\Connection;
 
@@ -52,7 +53,7 @@ final readonly class DoctrineOrderRepository implements OrderRepositoryInterface
 
         $itemsData = $this->connection->fetchAllAssociative(
             query: '
-                SELECT product_id, quantity, price 
+                SELECT id, product_id, quantity, price 
                 FROM order_items 
                 WHERE order_id = ?
             ',
@@ -70,6 +71,7 @@ final readonly class DoctrineOrderRepository implements OrderRepositoryInterface
                         callback: static fn(array $orderItem) => self::hydrate(
                             className: OrderItem::class,
                             data: [
+                                'id' => new OrderItemId($orderItem['id']),
                                 'productId' => new OrderItemProductId($orderItem['product_id']),
                                 'quantity' => new OrderItemQuantity($orderItem['quantity']),
                                 'price' => new OrderItemPrice($orderItem['price']),
@@ -90,9 +92,30 @@ final readonly class DoctrineOrderRepository implements OrderRepositoryInterface
         $this->connection->beginTransaction();
 
         try {
-            $this->connection->insert(
-                table: 'orders',
-                data: [
+            $this->connection->executeStatement(
+                sql: '
+                    INSERT INTO orders (
+                        id,
+                        customer_id,
+                        status,
+                        total_price,
+                        created_at,
+                        updated_at
+                    )
+                    VALUES (
+                        :id,
+                        :customer_id,
+                        :status,
+                        :total_price,
+                        :created_at,
+                        :updated_at
+                    )
+                    ON CONFLICT (id)
+                    DO UPDATE SET
+                       status = :status,
+                       updated_at = :updated_at
+                ',
+                params: [
                     'id' => $order->id()->value(),
                     'customer_id' => $order->customerId()->value(),
                     'status' => $order->status()->value(),
@@ -104,9 +127,26 @@ final readonly class DoctrineOrderRepository implements OrderRepositoryInterface
 
             /** @var OrderItem $orderItem */
             foreach ($order->items() as $orderItem) {
-                $this->connection->insert(
-                    table: 'order_items',
-                    data: [
+                $this->connection->executeStatement(
+                    sql: '
+                        INSERT INTO order_items (
+                            id,
+                            order_id,
+                            product_id,
+                            quantity,
+                            price
+                        ) VALUES (
+                            :id,
+                            :order_id,
+                            :product_id,
+                            :quantity,
+                            :price
+                        )
+                        ON CONFLICT (id)
+                        DO NOTHING
+                    ',
+                    params: [
+                        'id' => $orderItem->id()->value(),
                         'order_id' => $order->id()->value(),
                         'product_id' => $orderItem->productId()->value(),
                         'quantity' => $orderItem->quantity()->value(),

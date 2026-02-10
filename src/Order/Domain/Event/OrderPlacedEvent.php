@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Order\Domain\Event;
 
-use App\Order\Domain\ValueObject\Order\OrderCustomerId;
-use App\Order\Domain\ValueObject\Order\OrderId;
+use App\Order\Domain\Entity\OrderCustomerId;
+use App\Order\Domain\Entity\OrderId;
 use App\Shared\Domain\Event\DomainEvent;
 
 final readonly class OrderPlacedEvent extends DomainEvent

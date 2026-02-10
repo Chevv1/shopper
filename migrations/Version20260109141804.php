@@ -22,11 +22,11 @@ final class Version20260109141804 extends AbstractMigration
     {
         $table = $schema->createTable(name: 'payment_methods');
 
-        $table->addColumn(name: 'id', typeName: 'guid', options: ['notnull' => true]);
+        $table->addColumn(name: 'id', typeName: 'uuid', options: ['notnull' => true]);
         $table->addColumn(name: 'name', typeName: 'string', options: ['notnull' => true]);
         $table->addColumn(name: 'type', typeName: 'string', options: ['length' => 12, 'notnull' => true]);
         $table->addColumn(name: 'is_active', typeName: 'boolean', options: ['length' => 12, 'notnull' => true]);
-        $table->addColumn(name: 'logo_id', typeName: 'guid', options: ['length' => 36, 'notnull' => true]);
+        $table->addColumn(name: 'logo_id', typeName: 'uuid', options: ['length' => 36, 'notnull' => true]);
         $table->addColumn(name: 'created_at', typeName: 'datetime_immutable', options: ['notnull' => true]);
         $table->addColumn(name: 'updated_at', typeName: 'datetime_immutable', options: ['notnull' => true]);
 

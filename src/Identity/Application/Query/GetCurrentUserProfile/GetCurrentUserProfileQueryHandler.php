@@ -12,9 +12,7 @@ final readonly class GetCurrentUserProfileQueryHandler implements QueryHandlerIn
 {
     public function __construct(
         private ProfileRepositoryInterface $profileReadRepository,
-    )
-    {
-    }
+    ) {}
 
     public function __invoke(GetCurrentUserProfileQuery $query): ProfileReadModel
     {

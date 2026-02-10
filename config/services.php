@@ -20,13 +20,13 @@ return static function (ContainerConfigurator $container): void {
         ->set(name: 'files_directory', value: '%kernel.project_dir%/public/uploads')
         ->set(name: 'files_base_url', value: '/uploads');
 
-    $container->import(resource: 'services/shared.php');
-    $container->import(resource: 'services/identity.php');
-    $container->import(resource: 'services/files.php');
-    $container->import(resource: 'services/catalog.php');
-    $container->import(resource: 'services/order.php');
-    $container->import(resource: 'services/payment.php');
-    $container->import(resource: 'services/vendor_management.php');
-    $container->import(resource: 'services/cart.php');
-    $container->import(resource: 'services/chat.php');
+    $container->import(resource: '../src/Shared/Infrastructure/Symfony/config/services.php');
+    $container->import(resource: '../src/Identity/Infrastructure/Symfony/config/services.php');
+    $container->import(resource: '../src/Files/Infrastructure/Symfony/config/services.php');
+    $container->import(resource: '../src/Catalog/Infrastructure/Symfony/config/services.php');
+    $container->import(resource: '../src/Order/Infrastructure/Symfony/config/services.php');
+    $container->import(resource: '../src/Payment/Infrastructure/Symfony/config/services.php');
+    $container->import(resource: '../src/VendorManagement/Infrastructure/Symfony/config/services.php');
+    $container->import(resource: '../src/Cart/Infrastructure/Symfony/config/services.php');
+    $container->import(resource: '../src/Chat/Infrastructure/Symfony/config/services.php');
 };

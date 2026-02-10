@@ -19,8 +19,8 @@ final class Version20260111125953 extends AbstractMigration
     {
         $table = $schema->createTable(name: 'carts');
 
-        $table->addColumn(name: 'id', typeName: 'guid', options: ['notnull' => true]);
-        $table->addColumn(name: 'user_id', typeName: 'guid', options: ['length' => 36, 'notnull' => true]);
+        $table->addColumn(name: 'id', typeName: 'uuid', options: ['notnull' => true]);
+        $table->addColumn(name: 'user_id', typeName: 'uuid', options: ['length' => 36, 'notnull' => true]);
 
         $table->addPrimaryKeyConstraint(PrimaryKeyConstraint::editor()->setUnquotedColumnNames('id')->create());
         $table->addIndex(['user_id'], 'idx_cart_user_id');

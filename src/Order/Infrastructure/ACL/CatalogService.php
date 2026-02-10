@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Order\Infrastructure\ACL;
 
-use App\Order\Application\Port\Catalog\CatalogServiceInterface;
-use App\Order\Application\Port\Catalog\ProductSnapshot;
-use App\Order\Domain\ValueObject\Order\OrderItemPrice;
-use App\Order\Domain\ValueObject\Order\OrderItemProductId;
-use App\Order\Domain\ValueObject\Order\OrderSellerId;
+use App\Order\Application\Service\Catalog\CatalogServiceInterface;
+use App\Order\Application\Service\Catalog\ProductSnapshot;
+use App\Order\Domain\Entity\OrderItemPrice;
+use App\Order\Domain\Entity\OrderItemProductId;
+use App\Order\Domain\Entity\OrderSellerId;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection;
 
 final readonly class CatalogService implements CatalogServiceInterface
@@ -23,7 +24,8 @@ final readonly class CatalogService implements CatalogServiceInterface
             query: '
                 SELECT
                     id,
-                    price
+                    price,
+                    seller_id
                 FROM products
                 WHERE id = ?
             ',
@@ -43,7 +45,8 @@ final readonly class CatalogService implements CatalogServiceInterface
             query: '
                 SELECT
                     id,
-                    price
+                    price,
+                    seller_id
                 FROM products
                 WHERE id IN (?)
             ',
@@ -53,6 +56,7 @@ final readonly class CatalogService implements CatalogServiceInterface
                     array: $productIds,
                 ),
             ],
+            types: [ArrayParameterType::STRING],
         );
 
         return array_map(
@@ -65,8 +69,8 @@ final readonly class CatalogService implements CatalogServiceInterface
     {
         return new ProductSnapshot(
             id: new OrderItemProductId($productData['id']),
-            isAvailable: (bool) $productData['is_available'],
-            price: new OrderItemPrice($productData['price']),
+            isAvailable: true, // todo
+            price: new OrderItemPrice((int) $productData['price']),
             sellerId: new OrderSellerId($productData['seller_id']),
         );
     }

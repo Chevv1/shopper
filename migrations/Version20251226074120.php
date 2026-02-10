@@ -19,11 +19,11 @@ final class Version20251226074120 extends AbstractMigration
     {
         $table = $schema->createTable(name: 'products');
 
-        $table->addColumn(name: 'id', typeName: 'guid', options: ['notnull' => true]);
+        $table->addColumn(name: 'id', typeName: 'uuid', options: ['notnull' => true]);
         $table->addColumn(name: 'title', typeName: 'string', options: ['length' => 255, 'notnull' => true]);
         $table->addColumn(name: 'description', typeName: 'text', options: ['notnull' => true]);
         $table->addColumn(name: 'price', typeName: 'integer', options: ['notnull' => true]);
-        $table->addColumn(name: 'seller_id', typeName: 'guid', options: ['length' => 36, 'notnull' => true]);
+        $table->addColumn(name: 'seller_id', typeName: 'uuid', options: ['length' => 36, 'notnull' => true]);
         $table->addColumn(name: 'is_available', typeName: 'boolean', options: ['notnull' => true]);
         $table->addColumn(name: 'created_at', typeName: 'datetime_immutable', options: ['notnull' => true]);
         $table->addColumn(name: 'updated_at', typeName: 'datetime_immutable', options: ['notnull' => true]);

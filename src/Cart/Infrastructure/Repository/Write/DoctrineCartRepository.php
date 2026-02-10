@@ -15,12 +15,16 @@ use App\Cart\Domain\Exception\CartNotFoundException;
 use App\Cart\Domain\Repository\CartRepositoryInterface;
 use App\Shared\Domain\ValueObject\Money;
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception;
+use Psr\Log\LoggerInterface;
 use ReflectionClass;
+use Throwable;
 
 final readonly class DoctrineCartRepository implements CartRepositoryInterface
 {
     public function __construct(
-        private Connection $connection,
+        private Connection      $connection,
+        private LoggerInterface $logger,
     ) {}
 
     public function findByOwnerId(CartOwnerId $ownerId): Cart
@@ -43,6 +47,10 @@ final readonly class DoctrineCartRepository implements CartRepositoryInterface
         return $this->hydrate($data);
     }
 
+    /**
+     * @throws Throwable
+     * @throws Exception
+     */
     public function save(Cart $cart): void
     {
         $this->connection->beginTransaction();
@@ -57,7 +65,7 @@ final readonly class DoctrineCartRepository implements CartRepositoryInterface
             $this->createCartItems(cart: $cart, items: $cart->items());
 
             $this->connection->commit();
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->connection->rollBack();
             throw $e;
         }

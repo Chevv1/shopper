@@ -19,9 +19,9 @@ final class Version20251226074119 extends AbstractMigration
     {
         $table = $schema->createTable('profiles');
 
-        $table->addColumn(name: 'id', typeName: 'guid', options: ['notnull' => true]);
-        $table->addColumn(name: 'user_id', typeName: 'guid', options: ['notnull' => true]);
-        $table->addColumn(name: 'avatar_id', typeName: 'guid', options: ['notnull' => false]);
+        $table->addColumn(name: 'id', typeName: 'uuid', options: ['notnull' => true]);
+        $table->addColumn(name: 'user_id', typeName: 'uuid', options: ['notnull' => true]);
+        $table->addColumn(name: 'avatar_id', typeName: 'uuid', options: ['notnull' => false]);
         $table->addColumn(name: 'name', typeName: 'string', options: ['length' => 50, 'notnull' => true]);
         $table->addColumn(name: 'created_at', typeName: 'datetime_immutable', options: ['notnull' => true]);
         $table->addColumn(name: 'updated_at', typeName: 'datetime_immutable', options: ['notnull' => true]);

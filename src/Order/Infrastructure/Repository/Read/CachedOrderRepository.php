@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Order\Infrastructure\Repository\Read;
 
+use App\Order\Application\ReadModel\OrderReadModel;
 use App\Order\Application\ReadModel\OrderReadModelList;
 use App\Order\Application\Repository\OrderRepositoryInterface;
 use Symfony\Contracts\Cache\ItemInterface;
@@ -24,6 +25,18 @@ final readonly class CachedOrderRepository implements OrderRepositoryInterface
                 $item->expiresAfter(300);
 
                 return $this->decoratedOrderRepository->getByCustomerId($customerId);
+            },
+        );
+    }
+
+    public function getByIdAndCustomerId(string $id, string $customerId): OrderReadModel
+    {
+        return $this->cache->get(
+            key: 'orders.' . $id,
+            callback: function (ItemInterface $item) use ($id, $customerId) {
+                $item->expiresAfter(300);
+
+                return $this->decoratedOrderRepository->getByIdAndCustomerId($id, $customerId);
             },
         );
     }
